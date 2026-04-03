@@ -1,0 +1,6 @@
+ID,Type,Location,Threshold,Interval
+1,TEMP,Phong_khach,35.5,5
+2,HUMID,Phong_khach,80.0,5
+3,GAS,Bep,50.0,2
+4,DUST,Hanh_lang,100.0,10
+5,TEMP,Phong_ngu,30.0,5
