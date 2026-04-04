@@ -40,7 +40,7 @@ int main() {
                    sensors[i].send_interval);
         }
         //Chaỵ mô phỏng trong 15s
-        runSimulation(sensors, num_sensors, &stats, 15);
+        runSimulation(sensors, num_sensors, &stats, &buffer, 15);
         //In báo cáo
         printReport(stats);
 
