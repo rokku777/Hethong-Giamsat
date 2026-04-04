@@ -55,6 +55,12 @@ int loadFile(const char* filename, SensorSet sensors[]) {
                    sensors[count].location,
                    &sensors[count].threshold,
                    &sensors[count].send_interval) == 5) {
+
+            // Khởi tạo bộ nhớ cho filter
+            memset(sensors[count].filter_history, 0, sizeof(sensors[count].filter_history));
+            sensors[count].filter_index = 0;
+            sensors[count].violation_count = 0;
+
             count++;
         }
     }
@@ -105,16 +111,19 @@ void runSimulation(SensorSet sensors[], int num_sensors, Stats *stats, int durat
 
     for (int t = 1; t <= duration; t++) {
         for (int i = 0; i < num_sensors; i++) {
+
             // Kiểm tra đến chu kỳ gửi của thiết bị i chưa
             if (t % sensors[i].send_interval == 0) {
-                float val = generateRandomVal(sensors[i].type);
-                
+                float raw_val = generateRandomVal(sensors[i].type);
+                 float filtered_val = applyMovingAverage(&sensors[i], raw_val); // sử dụng hàm filter
+                handleThreshold(&sensors[i], filtered_val, stats);       // hàm sử lý ngưỡng 
+
                 // In ra màn hình
-                printf("[Giay %2d] %s (ID: %d) gui du lieu: %.2f\n", t, sensors[i].type, sensors[i].id, val);
+                printf("[Giay %2d] %s (ID: %d) gui du lieu: %.2f\n", t, sensors[i].type, sensors[i].id, raw_val);
                 
                 // Ghi log
                 char log_msg[150];
-                sprintf(log_msg, "Nhan du lieu - ID: %d, Loai: %s, Gia tri: %.2f", sensors[i].id, sensors[i].type, val);
+                sprintf(log_msg, "Nhan du lieu - ID: %d, Loai: %s, Gia tri: %.2f", sensors[i].id, sensors[i].type, raw_val);
                 writeLog(log_msg);
 
                 
@@ -125,4 +134,50 @@ void runSimulation(SensorSet sensors[], int num_sensors, Stats *stats, int durat
     
     writeLog("KET THUC MO PHONG");
     printf("       KET THUC MO PHONG    \n");
+}
+
+//4. XỬ LÝ LỌC NHIỄU VÀ VƯỢT NGƯỠNG
+
+// Hàm lọc nhiễu (moving average)
+float applyMovingAverage(SensorSet *s, float newVal) {
+    s->filter_history[s->filter_index] = newVal;            // lưu mẫu mới vào lịch sử
+    s->filter_index = (s->filter_index + 1) % FILTER_SIZE;  
+    // tính trung bình cộng 5 mẫu gần nhất 
+    float sum = 0;
+    for (int i = 0; i < FILTER_SIZE; i++) {
+        sum += s->filter_history[i];
+    }
+    
+    return sum / (float)FILTER_SIZE;
+}
+
+// Hàm vượt ngưỡng 
+void handleThreshold(SensorSet *s, float filteredVal, Stats *stats) {
+    if (filteredVal > s->threshold) {
+         s->violation_count++;          // tăng bộ đếm vi phạm liên tiếp
+    
+    // Trường hợp 1: vượt ngưỡng tức thì 
+        if (s->violation_count == 1) {
+            printf("    [CANH BAO] Sensor (ID: %d): Chom vuot nguong (%.2f). Dang theo doi...\n", s->id, filteredVal);
+        } 
+
+    // Trường hợp 2: vượt ngưỡng kéo dài
+         else if (s->violation_count >= 2) {
+            stats->threshold_exceed_count++;        // Chỉ ghi nhận vào thống kê khi đã xác nhận sự cố kéo dài
+            
+            char alert_msg[150];
+            sprintf(alert_msg, "SU CO KEO DAI - Sensor (ID: %d), Gia tri loc: %.2f (Threshold: %.2f)", 
+                    s->id, filteredVal, s->threshold);
+            writeLog(alert_msg);
+            printf("   [!] NGUY HIEM: %s\n", alert_msg);
+        }
+
+        else {
+        // Nếu giá trị quay về mức an toàn: Reset bộ đếm
+        if (s->violation_count >= 2) {
+            printf("   [INFO] Sensor %d: Da on dinh tro lai.\n", s->id);
+            }
+        s->violation_count = 0;
+        }
+    }
 }

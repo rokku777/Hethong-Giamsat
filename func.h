@@ -19,4 +19,8 @@ void printReport(Stats stats);
 float generateRandomValue(const char* type);
 void runSimulation(SensorSet sensors[], int num_sensors, Stats *stats, int duration_seconds);
 
+//4
+float applyMovingAverage(SensorSet *s, float newVal);
+void handleThreshold(SensorSet *s, float filteredVal, Stats *stats);
+
 #endif

@@ -12,6 +12,7 @@ Bộ đệm (Buffer) và Thống kê lỗi (Stats).
 #define MAX_SENSORS 30
 #define MAX_STRING_LEN 50
 #define BUFFER_CAPACITY 100        // Dung lượng bộ đệm
+#define FILTER_SIZE 5              // độ dài mảng lọc nhiễu 
 
 // 1. CẤU TRÚC DỮ LIỆU
 // 1.1 Struct cấu hình thiết bị
@@ -20,7 +21,12 @@ typedef struct {
     char type[MAX_STRING_LEN];      // Loại cảm biến
     char location[MAX_STRING_LEN];  // Vị trí lắp đặt
     float threshold;                // Ngưỡng cảnh báo
-    int send_interval;              // Chu kỳ gửi dữ liệu             
+    int send_interval;              // Chu kỳ gửi dữ liệu      
+    
+    // THÀNH PHẦN XỬ LÝ DỮ LIỆU
+    float filter_history[FILTER_SIZE];   // lưu 5 giá trị gần nhất để lọc
+    int filter_index;                    // vị trí hiện tại trong mảng lọc
+    int violation_count;                 // đếm số lần vượt ngưỡng liên tiếp 
 } SensorSet;
 
 // 1.2 Struct bản tin
