@@ -1,10 +1,20 @@
+/*
+ * Mô tả: Chương trình chính
+ * Nhiệm vụ: Khởi tạo bộ nhớ, đọc file cấu hình, chạy vòng lặp mô phỏng thu thập dữ liệu, 
+ * và in báo cáo thống kê sau khi kết thúc.
+ * Triển khai xử lý dữ liệu và bộ nhớ được viết tiếp tại đây
+*/
+
 #include <stdio.h>
+#include<stdlib.h>
+#include<time.h>
 #include "datatypes.h"
 #include "func.h"
 
 
-// HÀM MAIN (Test ý 1 & 2)
 int main() { 
+    srand(time(NULL));
+
     SensorSet sensors[MAX_SENSORS];
     Buffer buffer;
     Stats stats;
@@ -29,6 +39,11 @@ int main() {
                    sensors[i].threshold, 
                    sensors[i].send_interval);
         }
+        //Chaỵ mô phỏng trong 15s
+        runSimulation(sensors, num_sensors, &stats, 15);
+        //In báo cáo
+        printReport(stats);
+
     } else {
         printf("Ko tim thay thiet bi.\n");
     }

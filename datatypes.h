@@ -1,12 +1,19 @@
+/*
+Mô tả: Khai báo các hằng số và cấu trúc dữ liệu (structs) dùng chung cho toàn dự án.
+Bao gồm: Cấu hình thiết bị (SensorSet), Cấu trúc bản tin (SensorMessage), 
+Bộ đệm (Buffer) và Thống kê lỗi (Stats).
+*/
+
 #ifndef DATATYPES_H
 #define DATATYPES_H
 
-#include <time.h> // Cần cho biến time_t
+#include <time.h>
 
 #define MAX_SENSORS 30
 #define MAX_STRING_LEN 50
 #define BUFFER_CAPACITY 100        // Dung lượng bộ đệm
 
+// 1. CẤU TRÚC DỮ LIỆU
 // 1.1 Struct cấu hình thiết bị
 typedef struct {
     int id;
