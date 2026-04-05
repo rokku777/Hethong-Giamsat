@@ -156,6 +156,13 @@ void runSimulation(SensorSet sensors[], int num_sensors, Stats *stats, Buffer *b
 
 // Hàm lọc nhiễu (moving average)
 float applyMovingAverage(SensorSet *s, float newVal) {
+    // để tránh bị các số 0 kéo tụt trung bình xuống.
+    if (s->filter_index == 0 && s->filter_history[1] == 0.0f) {
+        for (int i = 0; i < FILTER_SIZE; i++) {
+            s->filter_history[i] = newVal;
+        }
+    }
+    
     s->filter_history[s->filter_index] = newVal;            // lưu mẫu mới vào lịch sử
     s->filter_index = (s->filter_index + 1) % FILTER_SIZE;
 
@@ -188,15 +195,14 @@ void handleThreshold(SensorSet *s, float filteredVal, Stats *stats) {
             writeLog(alert_msg);
             printf("   [!] NGUY HIEM: %s\n", alert_msg);
         }
-
-        else {
+    }    
+    else {
         // Nếu giá trị quay về mức an toàn: Reset bộ đếm
         if (s->violation_count >= 2) {
             printf("   [INFO] Sensor %d: Da on dinh tro lai.\n", s->id);
             }
         s->violation_count = 0;
         }
-    }
 }
 
 //5. QUẢN LÝ BỘ ĐỆM VÒNG
