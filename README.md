@@ -157,3 +157,4 @@ ID,Type,Location,Threshold,Interval
    - kiểm tra vượt ngưỡng
    - ghi log sự kiện
 4. Kết thúc mô phỏng và in báo cáo.
+<img width="950" height="997" alt="image" src="https://github.com/user-attachments/assets/619eabae-fb37-4570-979d-13bd083b37c7" />
